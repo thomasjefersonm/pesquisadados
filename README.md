@@ -6,9 +6,8 @@ Engenharia de Dados · Engenharia de Software 5ª fase · SATC · Prof. Jorge Lu
 > 📚 Documentação completa (MkDocs): https://thomasjefersonm.github.io/pesquisadados/
 
 ## Integrantes
-- Nome 1
-- Nome 2
-- Nome 3
+- Thomas Jeferson da Silva Maggi
+- Bruno Ghisi da Silva
 
 ## ⚠️ Aviso
 Projeto acadêmico, executado em modo local (`local[*]`). Os dados são fictícios.

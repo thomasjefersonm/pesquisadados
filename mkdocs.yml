@@ -6,3 +6,4 @@ nav:
   - Delta Lake: delta.md
   - Apache Iceberg: iceberg.md
 theme: readthedocs
+edit_uri: edit/main/docs/

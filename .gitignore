@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+site/
+spark-warehouse/
+metastore_db/
+derby.log
+data/delta/
+data/warehouse/
+logs/*.log
+.pytest_cache/
+.ruff_cache/

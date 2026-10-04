@@ -1,0 +1,8 @@
+site_name: Pesquisa - Apache Spark com Delta Lake e Apache Iceberg
+repo_url: https://github.com/thomasjefersonm/pesquisadados
+nav:
+  - Contextualização: index.md
+  - Apache Spark (PySpark): spark.md
+  - Delta Lake: delta.md
+  - Apache Iceberg: iceberg.md
+theme: readthedocs

@@ -1,0 +1,38 @@
+[project]
+name = "pesquisadados"
+version = "0.1.0"
+description = "Apache Spark com Delta Lake e Apache Iceberg - Engenharia de Dados SATC"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pyspark==3.5.3",
+    "delta-spark==3.2.1",
+]
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.2",
+    "ipykernel>=6.29",
+    "pytest>=8.2",
+    "mkdocs>=1.6",
+    "taskipy>=1.13",
+    "ruff>=0.6",
+    "isort>=5.13",
+    "pip-audit>=2.7",
+]
+
+[tool.taskipy.tasks]
+lab = "jupyter lab --allow-root"
+lint = "ruff check . && isort --check --diff ."
+format = "ruff format . && isort ."
+test = "pytest -vv"
+docs = "mkdocs serve"
+deploy = "mkdocs gh-deploy"
+audit = "pip-audit"
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["tests"]

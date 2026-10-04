@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Apache Spark (PySpark) - Pesquisa - Apache Spark com Delta Lake e Apache Iceberg</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Apache Spark (PySpark)";
+        var mkdocs_page_input_path = "spark.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Pesquisa - Apache Spark com Delta Lake e Apache Iceberg
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Contextualização</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Apache Spark (PySpark)</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#conceitos-principais">Conceitos principais</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#criando-a-sessao">Criando a sessão</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#lendo-os-dados-do-projeto">Lendo os dados do projeto</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#por-que-delta-e-iceberg">Por que Delta e Iceberg?</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../delta/">Delta Lake</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../iceberg/">Apache Iceberg</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Pesquisa - Apache Spark com Delta Lake e Apache Iceberg</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Apache Spark (PySpark)</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/thomasjefersonm/pesquisadados/edit/master/docs/spark.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="apache-spark-pyspark">Apache Spark (PySpark)</h1>
+<p>O <strong>Apache Spark</strong> é um motor de processamento distribuído de dados em memória. O <strong>PySpark</strong> é a API Python do Spark.</p>
+<h2 id="conceitos-principais">Conceitos principais</h2>
+<ul>
+<li><strong>SparkSession</strong>: ponto de entrada da aplicação.</li>
+<li><strong>DataFrame</strong>: tabela distribuída com colunas nomeadas.</li>
+<li><strong>Spark SQL</strong>: permite consultar DataFrames e tabelas com SQL.</li>
+<li><strong>Transformações</strong> (lazy) e <strong>Ações</strong> (executam o processamento).</li>
+<li><strong>Catálogo</strong>: onde as tabelas são registradas.</li>
+</ul>
+<h2 id="criando-a-sessao">Criando a sessão</h2>
+<pre><code class="language-python">from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName(&quot;exemplo&quot;).master(&quot;local[*]&quot;).getOrCreate()
+</code></pre>
+<h2 id="lendo-os-dados-do-projeto">Lendo os dados do projeto</h2>
+<pre><code class="language-python">pedidos = spark.read.csv(&quot;data/pedidos.csv&quot;, header=True, inferSchema=True)
+pedidos.printSchema()
+pedidos.filter(&quot;status = 'PAGO'&quot;).show()
+</code></pre>
+<h2 id="por-que-delta-e-iceberg">Por que Delta e Iceberg?</h2>
+<p>Arquivos Parquet/CSV comuns não suportam <code>UPDATE</code> e <code>DELETE</code> com transações. Os formatos de tabela <strong>Delta Lake</strong> e <strong>Apache Iceberg</strong> adicionam uma camada de metadados que traz transações <strong>ACID</strong>, histórico de versões (<em>time travel</em>) e evolução de schema ao Spark.</p>
+<p>No projeto, as sessões configuradas estão em <code>pesquisadados/main.py</code> (<code>spark_delta()</code> e <code>spark_iceberg()</code>).</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Contextualização"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../delta/" class="btn btn-neutral float-right" title="Delta Lake">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/thomasjefersonm/pesquisadados" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../delta/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Apache Iceberg - Pesquisa - Apache Spark com Delta Lake e Apache Iceberg</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Apache Iceberg";
+        var mkdocs_page_input_path = "iceberg.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Pesquisa - Apache Spark com Delta Lake e Apache Iceberg
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Contextualização</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../spark/">Apache Spark (PySpark)</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../delta/">Delta Lake</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Apache Iceberg</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#configuracao-no-spark">Configuração no Spark</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ddl">DDL</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#insert">INSERT</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#update">UPDATE</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#delete">DELETE</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#snapshots-time-travel">Snapshots (time travel)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#delta-x-iceberg">Delta x Iceberg</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Pesquisa - Apache Spark com Delta Lake e Apache Iceberg</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Apache Iceberg</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/thomasjefersonm/pesquisadados/edit/master/docs/iceberg.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="apache-iceberg">Apache Iceberg</h1>
+<p>O <strong>Apache Iceberg</strong> é um formato de tabela aberto criado pela Netflix. Ele organiza a tabela em <strong>metadados → manifest lists → manifests → arquivos de dados</strong>, e cada alteração gera um novo <strong>snapshot</strong>.</p>
+<h2 id="configuracao-no-spark">Configuração no Spark</h2>
+<p>Usa o pacote <code>org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.6.1</code> e um catálogo do tipo <code>hadoop</code> chamado <code>local</code>:</p>
+<pre><code class="language-python">spark = (
+    SparkSession.builder.master(&quot;local[*]&quot;)
+    .config(&quot;spark.jars.packages&quot;,
+            &quot;org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.6.1&quot;)
+    .config(&quot;spark.sql.extensions&quot;,
+            &quot;org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions&quot;)
+    .config(&quot;spark.sql.catalog.local&quot;, &quot;org.apache.iceberg.spark.SparkCatalog&quot;)
+    .config(&quot;spark.sql.catalog.local.type&quot;, &quot;hadoop&quot;)
+    .config(&quot;spark.sql.catalog.local.warehouse&quot;, &quot;data/warehouse&quot;)
+    .getOrCreate()
+)
+</code></pre>
+<h2 id="ddl">DDL</h2>
+<pre><code class="language-sql">CREATE NAMESPACE IF NOT EXISTS local.loja;
+CREATE TABLE local.loja.pedidos (...) USING iceberg;
+</code></pre>
+<h2 id="insert">INSERT</h2>
+<pre><code class="language-sql">INSERT INTO local.loja.pedidos VALUES
+(106, 2, 'Webcam', 1, 350.00, DATE'2026-09-10', 'PENDENTE');
+</code></pre>
+<p>Gera um snapshot com operação <code>append</code>.</p>
+<h2 id="update">UPDATE</h2>
+<pre><code class="language-sql">UPDATE local.loja.pedidos SET status = 'PAGO'
+WHERE id_cliente = 1 AND status = 'PENDENTE';
+</code></pre>
+<p>Gera um snapshot <code>overwrite</code> (copy-on-write por padrão).</p>
+<h2 id="delete">DELETE</h2>
+<pre><code class="language-sql">DELETE FROM local.loja.pedidos WHERE status = 'CANCELADO';
+</code></pre>
+<h2 id="snapshots-time-travel">Snapshots (time travel)</h2>
+<pre><code class="language-sql">SELECT snapshot_id, operation FROM local.loja.pedidos.snapshots;
+SELECT * FROM local.loja.pedidos VERSION AS OF &lt;snapshot_id&gt;;
+</code></pre>
+<h2 id="delta-x-iceberg">Delta x Iceberg</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Delta Lake</th>
+<th>Apache Iceberg</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Metadados</td>
+<td><code>_delta_log</code> (JSON)</td>
+<td>metadata.json + manifests (Avro)</td>
+</tr>
+<tr>
+<td>Versões</td>
+<td>version</td>
+<td>snapshot</td>
+</tr>
+<tr>
+<td>Integração Spark</td>
+<td>pacote pip <code>delta-spark</code></td>
+<td>JAR via <code>spark.jars.packages</code></td>
+</tr>
+</tbody>
+</table>
+<p>Notebook completo: <code>src/iceberg/apache_iceberg.ipynb</code>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../delta/" class="btn btn-neutral float-left" title="Delta Lake"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/thomasjefersonm/pesquisadados" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../delta/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

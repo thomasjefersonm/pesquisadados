@@ -104,7 +104,7 @@ pesquisadados/
 ├── assets/             # modelo ER
 ├── logs/  scripts/  examples/
 ```
-
+.
 ## Referências
 - https://github.com/jlsilva01/spark-delta
 - https://github.com/jlsilva01/spark-iceberg
